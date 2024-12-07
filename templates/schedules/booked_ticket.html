@@ -1,0 +1,35 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Booked Tickets{% endblock %}
+
+{% block content %}
+    <h2>Your Booked Tickets</h2>
+    <table class="booked-tickets-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Route</th>
+                <th>Departure Time</th>
+                <th>Price</th>
+                <th>Created at</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in booked_ticket %}
+                <tr>
+                    <td>{{ ticket.schedule.company.name }}</td>
+                    <td>{{ ticket.schedule.route }}</td>
+                    <td>{{ ticket.schedule.departure_time }}</td>
+                    <td>${{ ticket.total_price }}</td>
+                    <td>{{ ticket.created_at }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No tickets booked.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

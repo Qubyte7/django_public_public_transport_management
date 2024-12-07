@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Book Ticket{% endblock %}
+
+{% block content %}
+    <h2>Book Ticket</h2>
+    <div class="booking-details">
+        <p><strong>Company:</strong> {{ schedule.company.name }}</p>
+        <p><strong>Route:</strong> {{ schedule.route }}</p>
+        <p><strong>Departure Time:</strong> {{ schedule.departure_time }}</p>
+        <p><strong>Available Seats:</strong> {{ schedule.available_seats }}</p>
+        <p><strong>Price per Seat:</strong> ${{ schedule.price_per_seat }}</p>
+        <p><strong>Your Balance:</strong> ${{ user_balance }}</p>
+    </div>
+
+    <form method="post" class="booking-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Book Ticket</button>
+    </form>
+{% endblock %}
+

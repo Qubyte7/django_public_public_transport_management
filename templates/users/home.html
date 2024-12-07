@@ -1,0 +1,235 @@
+{% block content %}
+<html>
+    <head>
+        <title> Home Page</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    </head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FFEFCD;
+            margin: 0;
+            padding: 0;
+        }
+
+        h2, h3 {
+            color: #424530;
+        }
+
+        p {
+            color: #A58E74;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #FFF;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #A58E74;
+            padding: 10px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        th {
+            background-color: #E09132;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #FFEFCD;
+        }
+
+        tr:hover {
+            background-color: #E09132;
+            color: white;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #E09132;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: #424530;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        form input[type="hidden"] {
+            display: none;
+        }
+
+        form .btn {
+            margin: 5px;
+        }
+    </style>
+    <body>
+
+    <h2>Welcome, {{ user.username }}!</h2>
+    {% if district %}
+        <p>Your current district: <strong style="color: #E09132;">{{ district }}</strong></p>
+    {% else %}
+        <p style="color: #E09132; font-weight: bold;">Please update your location to see relevant travel plans.</p>
+    {% endif %}
+
+    <h3>Available Schedules for Your District</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ search_form.as_p }}
+        <button type="submit" class="btn">Search</button>
+    </form>
+
+    <form method="post" action="{% url 'update_location'%}" id="locationForm">
+        {% csrf_token %}
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+        <button type="button" onclick="getLocation()" class="btn">Get My Location</button>
+        <button type="submit" class="btn" style="display: none;" id="submitButton">Update Location</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Route</th>
+                <th>Departure Time</th>
+                <th>Available Seats</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for schedule in schedules %}
+                <tr>
+                    <td>{{ schedule.company.name }}</td>
+                    <td>{{ schedule.route }}</td>
+                    <td>{{ schedule.departure_time }}</td>
+                    <td>{{ schedule.available_seats }}</td>
+                    <td>${{ schedule.price_per_seat }}</td>
+                    <td><a href="{% url 'book_ticket' schedule.id %}" class="btn">Book</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #E09132;">No schedules available for your district.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Your Booked Tickets</h2>
+    <table class="booked-tickets-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Route</th>
+                <th>Departure Time</th>
+                <th>Price</th>
+                <th>Created at</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in booked_ticket %}
+                <tr>
+                    <td>{{ ticket.schedule.company.name }}</td>
+                    <td>{{ ticket.schedule.route }}</td>
+                    <td>{{ ticket.schedule.departure_time }}</td>
+                    <td>${{ ticket.total_price }}</td>
+                    <td>{{ ticket.created_at }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No tickets booked.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h1>Overview of the Ticket Booking Statistics in Rwanda</h1>
+<div style="width: 600px; height: 400px;">
+    <canvas id="myLineChart"></canvas>
+</div>
+
+<script>
+    // Data passed from the Django view
+    const bookedStatistics = JSON.parse('{{ booked_statistics|escapejs }}');
+    const labels = bookedStatistics.labels;
+    const bookedCounts = bookedStatistics.booked_counts;
+
+    const data = {
+        labels: labels,
+        datasets: [{
+            label: 'Bookings per Week',
+            data: bookedCounts,
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+
+    const config = {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Week'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Number of Bookings'
+                    }
+                }
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('myLineChart').getContext('2d');
+        new Chart(ctx, config);
+    });
+
+    // Geolocation functions
+    function showPosition(position) {
+        document.getElementById("latitude").value = position.coords.latitude;
+        document.getElementById("longitude").value = position.coords.longitude;
+        document.getElementById("submitButton").style.display = "inline-block";
+    }
+
+    function showError(error) {
+        // Error handling
+    }
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+</script>
+
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmation{% endblock %}
+
+{% block content %}
+    <h2>Booking Confirmation</h2>
+    <p>Thank you for your booking!</p>
+    <div class="booking-details">
+        <h3>Booking Details:</h3>
+        <ul>
+            <li><strong>Company:</strong> {{ booking.schedule.company.name }}</li>
+            <li><strong>Route:</strong> {{ booking.schedule.route }}</li>
+            <li><strong>Departure Time:</strong> {{ booking.schedule.departure_time }}</li>
+            <li><strong>Number of Seats:</strong> {{ booking.num_seats }}</li>
+            <li><strong>Total Price:</strong> ${{ booking.total_price }}</li>
+        </ul>
+    </div>
+    <a href="{% url 'home' %}" class="btn">Back to Home</a>
+{% endblock %}
+

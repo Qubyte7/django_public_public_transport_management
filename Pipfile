@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+django-environ = "*"
+pillow = "*"
+django-crispy-forms = "*"
+django-allauth = "*"
+django-filter = "*"
+gunicorn = "*"
+whitenoise = "*"
+django-debug-toolbar = "*"
+pytest = "*"
+pytest-django = "*"
+django-widget-tweaks = "*"
+django-bootstrap4 = "*"
+psycopg2 = "*"
+geopy = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
